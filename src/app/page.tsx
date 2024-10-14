@@ -1,3 +1,9 @@
-export default function Main() {
-  return <div></div>;
+import { Header } from "@/components/Header/index";
+
+export default function Home() {
+  return (
+    <div>
+      <Header />
+    </div>
+  );
 }
