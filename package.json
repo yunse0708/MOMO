@@ -1,6 +1,7 @@
 {
   "name": "moa-moa",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,16 +10,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.0.1",
+    "@next/mdx": "^14.2.15",
     "@vanilla-extract/css": "^1.16.0",
-    "@vanilla-extract/next-plugin": "^2.4.6",
     "next": "14.2.15",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vanilla-extract/next-plugin": "^2.4.6",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "typescript": "^5"

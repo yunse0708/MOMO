@@ -4,11 +4,9 @@ export const Layout = style({
   display: "flex",
   width: "100vw",
   height: "80px",
-  backgroundColor: "#000B1F",
-  opacity: 0.09,
+  backgroundColor: "rgba(0, 11, 31, 0.09)",
   position: "fixed",
   alignItems: "center",
-  right: "0",
   top: "0",
   justifyContent: " space-between",
 });

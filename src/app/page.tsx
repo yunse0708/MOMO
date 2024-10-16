@@ -1,9 +1,11 @@
-import { Header } from "@/components/Header/index";
+'use client'
+
+import { Main } from "@/app/main/index";
 
 export default function Home() {
   return (
     <div>
-      <Header />
+      <Main />
     </div>
   );
 }
