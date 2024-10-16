@@ -1,5 +1,5 @@
 import * as S from "./styles.css";
-import { Header } from "@/components/header/index";
+import { Header } from "@/components/header";
 import Image from "next/image";
 import Background from "../../../public/images/Background.svg";
 import { Box, movie } from "@/components/box/index";
