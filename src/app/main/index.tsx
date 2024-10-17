@@ -10,7 +10,7 @@ import {
 } from "@/api/api";
 import * as S from "./styles.css";
 import { Header } from "@/components/Header";
-import { Box, ottServices } from "@/components/Box";
+import { Box, ottServices } from "@/components/Box/index";
 import { Footer } from "@/components/Footer";
 
 export const Main = () => {
