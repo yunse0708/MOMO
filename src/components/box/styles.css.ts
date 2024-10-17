@@ -14,7 +14,7 @@ export const ImageBox = style({
   flexDirection: "row",
   justifyContent: "center",
   alignItems: "center",
-  marginTop: "50px",
+  marginTop: "5.5%",
 });
 
 export const Image = style({
