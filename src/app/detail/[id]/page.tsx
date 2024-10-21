@@ -1,84 +1,215 @@
-// src/app/detail/[id]/index.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchMovieDetails, fetchTvShowDetails } from "@/api/api"; // API 함수 임포트
-import * as S from "./style.css"; // 스타일 파일 임포트
-import { MovieDetails, TVShowDetails } from "@/types/Movie"; // 타입 임포트
-import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import * as S from "./style.css";
+import { MovieDetails, CastMember, Movie } from "@/types/Movie";
+import {
+  fetchMovieDetails,
+  fetchMovieCredits,
+  fetchReviews,
+  fetchSimilarMovies,
+} from "@/api/api";
 
-function isMovieDetails(
-  details: MovieDetails | TVShowDetails
-): details is MovieDetails {
-  return (details as MovieDetails).release_date !== undefined;
+interface Review {
+  author: string;
+  content: string;
+  rating: number | null;
+  created_at: string;
 }
 
-export default function DetailPage({ params }: { params: { id: string } }) {
-  const [details, setDetails] = useState<MovieDetails | TVShowDetails | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-  const type = searchParams.get("type");
+const DetailPage = () => {
+  const router = useRouter();
+  const { id } = useParams();
+
+  const [movie, setMovie] = useState<MovieDetails | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
+  const [likes, setLikes] = useState(0);
+  const [dislikes, setDislikes] = useState(0);
+  const [newReview, setNewReview] = useState<string>("");
 
   useEffect(() => {
-    if (params.id && type) {
-      const fetchDetails = async () => {
+    const loadMovie = async () => {
+      if (id) {
         try {
-          let data: MovieDetails | TVShowDetails | null = null;
+          const data = await fetchMovieDetails(Number(id));
+          const credits = await fetchMovieCredits(Number(id));
+          console.log("영화 상세 정보:", data);
+          console.log("출연진 정보:", credits.cast);
+          setMovie({ ...data, cast: credits.cast });
 
-          if (type === "movie") {
-            data = await fetchMovieDetails(Number(params.id));
-            console.log("영화 상세 정보:", data); // 로그 추가
-          } else if (type === "tv") {
-            data = await fetchTvShowDetails(Number(params.id));
-            console.log("TV 프로그램 상세 정보:", data); // 로그 추가
-          }
-
-          setDetails(data);
-        } catch (err) {
-          console.error("상세 정보를 가져오는 중 오류 발생:", err);
-          setError("상세 정보를 가져오는 중 오류가 발생했습니다.");
-        } finally {
-          setIsLoading(false);
+          // 비슷한 영화 데이터 가져오기
+          const similar = await fetchSimilarMovies(Number(id));
+          setSimilarMovies(similar);
+        } catch (error) {
+          console.error("영화 데이터를 불러오는 중 오류 발생:", error);
         }
-      };
+      }
+    };
 
-      fetchDetails();
-    }
-  }, []);
+    const loadReviews = async () => {
+      if (id) {
+        try {
+          const data = await fetchReviews(Number(id));
+          setReviews(data);
+        } catch (error) {
+          console.error("리뷰 데이터를 불러오는 중 오류 발생:", error);
+        }
+      }
+    };
 
-  if (isLoading) {
-    return <div>로딩 중...</div>;
-  }
+    loadMovie();
+    loadReviews();
+  }, [id]);
 
-  if (error) {
-    return <div>오류 발생: {error}</div>; // 구체적인 오류 메시지 표시
+  const handleLike = () => {
+    setLikes(likes + 1);
+  };
+
+  const handleDislike = () => {
+    setDislikes(dislikes + 1);
+  };
+
+  const handleReviewChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewReview(event.target.value);
+  };
+
+  const handleReviewSubmit = () => {
+    if (newReview.trim() === "") return;
+
+    const newReviewData: Review = {
+      author: "사용자",
+      content: newReview,
+      rating: 9.3,
+      created_at: new Date().toISOString(),
+    };
+
+    setReviews((prevReviews) => [newReviewData, ...prevReviews]);
+    setNewReview("");
+  };
+
+  const handleSimilarMovieClick = (movieId: number) => {
+    router.push(`/detail/${movieId}`);
+  };
+
+  if (!movie) {
+    return <div></div>;
   }
 
   return (
     <div className={S.Container}>
-      {details && (
-        <>
-          <h1 className={S.Title}>
-            {isMovieDetails(details) ? details.title : details.name}
-          </h1>
-          <img
-            src={`https://image.tmdb.org/t/p/w500${details.poster_path}`}
-            alt={isMovieDetails(details) ? details.title : details.name}
-            className={S.Poster}
+      <div
+        className={S.Banner}
+        style={{
+          backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.poster_path})`,
+        }}
+      >
+        <div className={S.Overlay}>
+          <div className={S.Content}>
+            <div className={S.PosterContainer}>
+              <Image
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                alt={movie.title}
+                className={S.Poster}
+                width={300}
+                height={450}
+              />
+            </div>
+            <div className={S.InfoContainer}>
+              <h1 className={S.Title}>
+                {movie.title}{" "}
+                <span className={S.ReleaseDate}>
+                  ({movie.release_date.split("-")[0]})
+                </span>
+              </h1>
+              <p className={S.Rating}>평점: {movie.vote_average} / 10</p>
+              <p className={S.Genres}>
+                장르: {movie.genres.map((genre) => genre.name).join(", ")}
+              </p>
+              <p className={S.Overview}>{movie.overview}</p>
+              <div className={S.CastList}>
+                <ul>
+                  {(movie.cast || [])
+                    .slice(0, 5)
+                    .map((actor: CastMember, index) => (
+                      <li key={index}>
+                        {actor.profile_path ? (
+                          <Image
+                            src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`}
+                            alt={actor.name}
+                            width={50}
+                            height={75}
+                          />
+                        ) : null}
+                        <span>
+                          {actor.name} - {actor.character}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div className={S.Buttons}>
+                <button className={S.LikeButton} onClick={handleLike}>
+                  👍 {likes}
+                </button>
+                <button className={S.DislikeButton} onClick={handleDislike}>
+                  👎 {dislikes}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={S.ReviewSection}>
+        <h2 className={S.ReviewTitle}>리뷰</h2>
+        <div className={S.ReviewInputContainer}>
+          <input
+            type="text"
+            className={S.ReviewInput}
+            placeholder="영화 감상평을 남겨주세요."
+            value={newReview}
+            onChange={handleReviewChange}
           />
-          <p className={S.Overview}>{details.overview}</p>
-          <p className={S.Rating}>평점: {details.vote_average}</p>
-          <p className={S.ReleaseDate}>
-            출시일:{" "}
-            {isMovieDetails(details)
-              ? details.release_date
-              : details.first_air_date}
-          </p>
-        </>
-      )}
+          <button onClick={handleReviewSubmit} className={S.ReviewSubmitButton}>
+            ▶︎
+          </button>
+        </div>
+        <div className={S.ReviewList}>
+          {reviews.map((review, index) => (
+            <div key={index} className={S.ReviewCard}>
+              <h3>{review.author}</h3>
+              <p>{review.content}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 비슷한 장르의 영화 목록 추가 */}
+      <div className={S.SimilarMoviesSection}>
+        <h2 className={S.SimilarMoviesTitle}>비슷한 영화</h2>
+        <div className={S.SimilarMoviesList}>
+          {similarMovies.map((similarMovie) => (
+            <div
+              key={similarMovie.id}
+              className={S.SimilarMovieCard}
+              onClick={() => handleSimilarMovieClick(similarMovie.id)} // 클릭 시 상세정보로 이동
+            >
+              <Image
+                src={`https://image.tmdb.org/t/p/w200${similarMovie.poster_path}`}
+                alt={similarMovie.title}
+                width={150}
+                height={225}
+                className={S.SimilarMovieImage}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default DetailPage;

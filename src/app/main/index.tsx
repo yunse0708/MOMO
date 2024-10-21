@@ -11,7 +11,7 @@ import {
 import * as S from "./styles.css";
 import { Header } from "@/components/Header";
 import { Box, ottServices } from "@/components/Box/index";
-import { Footer } from "@/components/Footer";
+import Footer from "../../../public/images/Footer.svg";
 
 export const Main = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -75,6 +75,7 @@ export const Main = () => {
   return (
     <div className={S.Layout}>
       <Header onSearch={handleSearch} />
+
       <div className={S.Layout2}>
         <Box services={ottServices} />
         {isSearching ? (
@@ -119,28 +120,26 @@ export const Main = () => {
           <>
             <div className={S.Title}>영화</div>
             <div className={S.PosterContainer}>
-              <div className={S.GenreTitle}>코미디 영화</div>
-              {filterMoviesByGenre("35")
-                .slice(0, 5)
-                .map((movie) => (
-                  <div
-                    key={movie.id}
-                    onClick={() => handleMovieClick(movie.id)}
-                    style={{ cursor: "pointer", flex: "0 0 auto" }}
-                  >
-                    <Image
-                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                      alt={movie.title}
-                      className={S.Poster}
-                      width={200}
-                      height={300}
-                    />
-                  </div>
-                ))}
+              {movies.slice(0, 10).map((movie) => (
+                <div
+                  key={movie.id}
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: "pointer", flex: "0 0 auto" }}
+                >
+                  <Image
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
+                    className={S.Poster}
+                    width={200}
+                    height={300}
+                  />
+                </div>
+              ))}
             </div>
+
             <div className={S.Title}>인기 TV 프로그램</div>
             <div className={S.PosterContainer}>
-              {tvShows.slice(0, 5).map((show) => (
+              {tvShows.slice(0, 10).map((show) => (
                 <div
                   key={show.id}
                   onClick={() => handleTvShowClick(show.id)}
@@ -149,6 +148,44 @@ export const Main = () => {
                   <Image
                     src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
                     alt={show.name}
+                    className={S.Poster}
+                    width={200}
+                    height={300}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className={S.Title}>코미디 영화</div>
+            <div className={S.PosterContainer}>
+              {filterMoviesByGenre("35").map((movie) => (
+                <div
+                  key={movie.id}
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: "pointer", flex: "0 0 auto" }}
+                >
+                  <Image
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
+                    className={S.Poster}
+                    width={200}
+                    height={300}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className={S.Title}>액션 영화</div>
+            <div className={S.PosterContainer}>
+              {filterMoviesByGenre("28").map((movie) => (
+                <div
+                  key={movie.id}
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: "pointer", flex: "0 0 auto" }}
+                >
+                  <Image
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
                     className={S.Poster}
                     width={200}
                     height={300}
